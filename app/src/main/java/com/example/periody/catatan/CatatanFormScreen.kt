@@ -15,7 +15,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.example.periody.model.Catatan
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

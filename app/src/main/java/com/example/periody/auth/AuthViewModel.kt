@@ -62,6 +62,53 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    private fun showError(message: String) {
+        _state.value = _state.value.copy(
+            isLoading = false,
+            error = message
+        )
+    }
+
+    private fun mapRegisterError(e: Exception): String {
+        val msg = e.message ?: ""
+        return when {
+            "duplicate key value violates unique constraint" in msg ->
+                "Email sudah terdaftar. Silakan login."
+            "Failed to connect" in msg || "timeout" in msg ->
+                "Tidak dapat terhubung ke server. Periksa koneksi internet Anda."
+            else -> "Registrasi gagal. Silakan coba lagi."
+        }
+    }
+
+    // ============================================================
+    // SANITIZE INPUT
+    // ============================================================
+    private fun sanitizeInput(
+        username: String,
+        firstName: String?,
+        lastName: String?,
+        phone: String?,
+        address: String?
+    ): Map<String, String> {
+
+        val safeUsername = username.ifBlank { "User" }
+        val safeFirst = firstName?.ifBlank { "Nama" } ?: "Nama"
+        val safeLast = lastName?.ifBlank { "Lengkap" } ?: "Lengkap"
+        val safePhone = phone?.ifBlank { "-" } ?: "-"
+        val safeAddress = address?.ifBlank { "-" } ?: "-"
+        val fullName = "$safeFirst $safeLast"
+
+        return mapOf(
+            "username" to safeUsername,
+            "firstName" to safeFirst,
+            "lastName" to safeLast,
+            "name" to fullName,
+            "phone" to safePhone,
+            "address" to safeAddress,
+            "profile_image_url" to ""
+        )
+    }
+
     // ============================================================
     // REGISTER
     // ============================================================
@@ -82,6 +129,16 @@ class AuthViewModel : ViewModel() {
                 registerSuccess = false
             )
 
+            // VALIDASI INPUT
+            when {
+                email.isBlank() -> return@launch showError("Email wajib diisi.")
+                !email.contains("@") -> return@launch showError("Format email tidak valid.")
+                password.length < 6 -> return@launch showError("Password minimal 6 karakter.")
+                username.isBlank() -> return@launch showError("Username wajib diisi.")
+                firstName.isNullOrBlank() -> return@launch showError("Nama depan wajib diisi.")
+                lastName.isNullOrBlank() -> return@launch showError("Nama belakang wajib diisi.")
+            }
+
             try {
                 // 1) Register ke Auth
                 supabase.auth.signUpWith(Email) {
@@ -89,26 +146,22 @@ class AuthViewModel : ViewModel() {
                     this.password = password
                 }
 
-                val userId = supabase.auth.currentSessionOrNull()?.user?.id
+                // 2) Ambil userId dari session
+                val session = supabase.auth.currentSessionOrNull()
+                    ?: throw Exception("Session tidak ditemukan setelah registrasi")
+
+                val userId = session.user?.id
                     ?: throw Exception("User ID tidak ditemukan setelah registrasi")
 
-                val fullName = listOfNotNull(firstName, lastName)
-                    .joinToString(" ")
-                    .ifBlank { "" }
+                // 3) Bersihkan input
+                val cleaned = sanitizeInput(username, firstName, lastName, phone, address)
 
-                // 2) Insert ke tabel users
+                // 4) Insert ke tabel users (SESUAI TABEL KAMU)
                 supabase.from("users").insert(
                     mapOf(
                         "id" to userId,
-                        "email" to email,
-                        "username" to username,
-                        "first_name" to firstName,
-                        "last_name" to lastName,
-                        "name" to fullName,
-                        "phone" to phone,
-                        "address" to address,
-                        "profile_image_url" to null
-                    )
+                        "email" to email
+                    ) + cleaned
                 )
 
                 val user = loadUserSync(userId)
@@ -120,10 +173,14 @@ class AuthViewModel : ViewModel() {
                 )
 
             } catch (e: Exception) {
-                _state.value = _state.value.copy(
-                    isLoading = false,
-                    error = e.message ?: "Registrasi gagal"
-                )
+                val msg = e.message ?: ""
+
+                if ("duplicate key value violates unique constraint" in msg) {
+                    _state.value = AuthState(registerSuccess = true)
+                    return@launch
+                }
+
+                showError(mapRegisterError(e))
             }
         }
     }
@@ -133,9 +190,7 @@ class AuthViewModel : ViewModel() {
     // ============================================================
     private fun login(email: String, password: String) {
         viewModelScope.launch {
-
             _state.value = _state.value.copy(isLoading = true, error = null)
-
             try {
                 supabase.auth.signInWith(Email) {
                     this.email = email
@@ -153,10 +208,7 @@ class AuthViewModel : ViewModel() {
                 )
 
             } catch (e: Exception) {
-                _state.value = _state.value.copy(
-                    isLoading = false,
-                    error = e.message ?: "Login gagal"
-                )
+                showError(e.message ?: "Login gagal")
             }
         }
     }
@@ -166,7 +218,6 @@ class AuthViewModel : ViewModel() {
     // ============================================================
     fun checkSession() {
         viewModelScope.launch {
-
             val session = supabase.auth.currentSessionOrNull()
             if (session == null) {
                 _state.value = AuthState(isAuthenticated = false)
@@ -189,15 +240,8 @@ class AuthViewModel : ViewModel() {
     fun logout() {
         viewModelScope.launch {
             _state.value = AuthState()
-
-            try {
-                supabase.auth.clearSession()
-            } catch (_: Exception) {}
-
-            try {
-                supabase.auth.signOut()
-            } catch (_: Exception) {}
-
+            try { supabase.auth.clearSession() } catch (_: Exception) {}
+            try { supabase.auth.signOut() } catch (_: Exception) {}
             _state.value = AuthState()
         }
     }
@@ -220,7 +264,7 @@ class AuthViewModel : ViewModel() {
                 val user = loadUserSync(userId)
                 _state.value = _state.value.copy(currentUser = user)
             } catch (e: Exception) {
-                _state.value = _state.value.copy(error = e.message)
+                showError(e.message ?: "Gagal memuat data user")
             }
         }
     }
@@ -249,7 +293,7 @@ class AuthViewModel : ViewModel() {
                 onDone()
 
             } catch (e: Exception) {
-                _state.value = _state.value.copy(error = e.message)
+                showError(e.message ?: "Gagal memperbarui foto profil")
             }
         }
     }
@@ -267,11 +311,16 @@ class AuthViewModel : ViewModel() {
             try {
                 val userId = supabase.auth.currentSessionOrNull()?.user?.id ?: return@launch
 
+                val safeName = name?.ifBlank { "Nama Lengkap" } ?: "Nama Lengkap"
+                val safePhone = phone?.ifBlank { "-" } ?: "-"
+                val safeAddress = address?.ifBlank { "-" } ?: "-"
+                val safeUsername = username.ifBlank { "User" }
+
                 supabase.from("users").update({
-                    set("username", username)
-                    set("name", name ?: "")
-                    set("phone", phone ?: "")
-                    set("address", address ?: "")
+                    set("username", safeUsername)
+                    set("name", safeName)
+                    set("phone", safePhone)
+                    set("address", safeAddress)
                 }) {
                     filter { eq("id", userId) }
                 }
@@ -279,7 +328,7 @@ class AuthViewModel : ViewModel() {
                 loadUser(userId)
 
             } catch (e: Exception) {
-                _state.value = _state.value.copy(error = e.message)
+                showError(e.message ?: "Gagal memperbarui data")
             }
         }
     }
@@ -303,7 +352,7 @@ class AuthViewModel : ViewModel() {
                 loadUser(userId)
 
             } catch (e: Exception) {
-                _state.value = _state.value.copy(error = e.message)
+                showError(e.message ?: "Gagal memperbarui email")
             }
         }
     }
@@ -316,7 +365,7 @@ class AuthViewModel : ViewModel() {
             try {
                 supabase.auth.updateUser { password = newPassword }
             } catch (e: Exception) {
-                _state.value = _state.value.copy(error = e.message)
+                showError(e.message ?: "Gagal memperbarui password")
             }
         }
     }
