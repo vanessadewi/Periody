@@ -32,7 +32,10 @@ fun GrafikScreen(
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
 
-        GrafikCard(title = "Grafik Gejala Utama") {
+        GrafikCard(
+            title = "Grafik Gejala Utama",
+            description = "Menampilkan jumlah gejala utama."
+        ) {
             if (state.gejalaUtama.isEmpty()) {
                 Text("Tidak ada data")
             } else {
@@ -43,7 +46,10 @@ fun GrafikScreen(
             }
         }
 
-        GrafikCard(title = "Grafik Gejala Tambahan") {
+        GrafikCard(
+            title = "Grafik Gejala Tambahan",
+            description = "Menampilkan frekuensi gejala tambahan yang tercatat."
+        ) {
             if (state.gejalaTambahan.isEmpty()) {
                 Text("Tidak ada data")
             } else {
@@ -54,7 +60,10 @@ fun GrafikScreen(
             }
         }
 
-        GrafikCard(title = "Grafik Intensitas") {
+        GrafikCard(
+            title = "Grafik Intensitas",
+            description = "Menampilkan tingkat intensitas gejala dari setiap catatan."
+        ) {
             if (state.intensitasList.isEmpty()) {
                 Text("Tidak ada data")
             } else {

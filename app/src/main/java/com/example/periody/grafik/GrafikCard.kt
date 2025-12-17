@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun GrafikCard(
     title: String,
+    description: String? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Card(
@@ -20,6 +21,15 @@ fun GrafikCard(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(title, style = MaterialTheme.typography.titleMedium)
+
+            if (description != null) {
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
             content()
         }
     }

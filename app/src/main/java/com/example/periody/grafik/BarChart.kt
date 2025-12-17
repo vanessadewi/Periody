@@ -3,6 +3,7 @@ package com.example.periody.grafik
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -23,18 +24,28 @@ fun BarChart(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(maxHeight),
+            .height(maxHeight + 32.dp),
         horizontalArrangement = Arrangement.spacedBy(spacing)
     ) {
         values.forEachIndexed { index, value ->
             val ratio = value.toFloat() / maxValue.toFloat()
             val barHeight = maxHeight * ratio
 
-            Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier.width(barWidth),
+                verticalArrangement = Arrangement.Bottom
+            ) {
+                // Label angka di atas batang
+                Text(
+                    text = value.toString(),
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.align(androidx.compose.ui.Alignment.CenterHorizontally)
+                )
+
                 Canvas(
                     modifier = Modifier
-                        .width(barWidth)
                         .height(maxHeight)
+                        .fillMaxWidth()
                 ) {
                     drawRect(
                         color = barColor,
@@ -45,8 +56,15 @@ fun BarChart(
                         )
                     )
                 }
+
                 Spacer(Modifier.height(4.dp))
-                androidx.compose.material3.Text(labels[index])
+
+                // Label kategori di bawah batang
+                Text(
+                    text = labels[index],
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.align(androidx.compose.ui.Alignment.CenterHorizontally)
+                )
             }
         }
     }
