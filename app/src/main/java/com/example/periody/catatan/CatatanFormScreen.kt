@@ -5,6 +5,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.DropdownMenuItem
@@ -28,29 +30,23 @@ fun CatatanFormScreen(
     val context = LocalContext.current
     val state by viewModel.state.collectAsState()
 
-    // Data existing jika mode edit
     val existing = remember(state.list, state.selected, id) {
         state.list.find { it.id == id } ?: state.selected
     }
 
-    // ============================
-    // STATE FORM
-    // ============================
     var tanggal by remember { mutableStateOf(existing?.tanggal ?: "") }
     var intensitasInput by remember { mutableStateOf(existing?.intensitas?.toString() ?: "") }
-    var gejalaTambahan by remember { mutableStateOf(existing?.gejala_tambahan ?: emptyList()) }
 
-    // FOTO
+    var gejala by remember { mutableStateOf(existing?.gejala ?: "") }
+    var expanded by remember { mutableStateOf(false) }
+
+    var gejalaTambahan by remember { mutableStateOf(existing?.gejala_tambahan ?: emptyList()) }
+    val daftarGejalaTambahan = listOf("Demam", "Batuk", "Pusing", "Mual", "Sesak Napas", "Nyeri Otot")
+
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     val pickImage = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri -> selectedImageUri = uri }
-
-    // ============================
-    // DROPDOWN GEJALA
-    // ============================
-    var expanded by remember { mutableStateOf(false) }
-    var gejala by remember { mutableStateOf(existing?.gejala ?: "") }
 
     Scaffold(
         topBar = {
@@ -65,13 +61,11 @@ fun CatatanFormScreen(
         Column(
             modifier = Modifier
                 .padding(padding)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            // ============================
-            // INPUT TANGGAL
-            // ============================
             OutlinedTextField(
                 value = tanggal,
                 onValueChange = { tanggal = it },
@@ -79,9 +73,6 @@ fun CatatanFormScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // ============================
-            // DROPDOWN GEJALA
-            // ============================
             ExposedDropdownMenuBox(
                 expanded = expanded,
                 onExpandedChange = { expanded = !expanded }
@@ -90,7 +81,7 @@ fun CatatanFormScreen(
                     value = gejala,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Gejala") },
+                    label = { Text("Gejala Utama") },
                     modifier = Modifier
                         .menuAnchor()
                         .fillMaxWidth()
@@ -112,9 +103,24 @@ fun CatatanFormScreen(
                 }
             }
 
-            // ============================
-            // INPUT INTENSITAS
-            // ============================
+            Text("Gejala Tambahan", style = MaterialTheme.typography.titleMedium)
+
+            daftarGejalaTambahan.forEach { item ->
+                Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = gejalaTambahan.contains(item),
+                        onCheckedChange = {
+                            gejalaTambahan = if (gejalaTambahan.contains(item)) {
+                                gejalaTambahan - item
+                            } else {
+                                gejalaTambahan + item
+                            }
+                        }
+                    )
+                    Text(item)
+                }
+            }
+
             OutlinedTextField(
                 value = intensitasInput,
                 onValueChange = { intensitasInput = it },
@@ -122,9 +128,6 @@ fun CatatanFormScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // ============================
-            // FOTO
-            // ============================
             Button(onClick = { pickImage.launch("image/*") }) {
                 Text("Pilih Foto")
             }
@@ -142,9 +145,6 @@ fun CatatanFormScreen(
                 )
             }
 
-            // ============================
-            // TOMBOL SIMPAN / UPDATE
-            // ============================
             Button(
                 onClick = {
                     val intensitas = intensitasInput.toDoubleOrNull()
@@ -180,7 +180,6 @@ fun CatatanFormScreen(
                 Text(if (mode == "edit") "Update" else "Simpan")
             }
 
-            // ERROR
             state.error?.let {
                 Text(it, color = MaterialTheme.colorScheme.error)
             }

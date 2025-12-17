@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 fun ReminderFormScreen(
     navController: NavController,
     viewModel: ReminderViewModel = viewModel(),
-    mode: String, // "tambah" atau "edit"
+    mode: String,
     id: String?,
     userId: String
 ) {

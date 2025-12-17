@@ -118,7 +118,7 @@ class ArtikelViewModel(
         viewModelScope.launch {
             try {
                 repo.delete(id)
-                loadAll()   // refresh list artikel
+                loadAll()
             } catch (e: Exception) {
                 _state.value = _state.value.copy(error = e.message)
             }

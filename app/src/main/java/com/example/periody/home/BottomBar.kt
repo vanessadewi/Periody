@@ -54,15 +54,11 @@ sealed class BottomNavItem(
 ) {
     object Home : BottomNavItem("home", "Home", Icons.Default.Home)
 
-    // ✅ langsung ke ArtikelListScreen
     object Artikel : BottomNavItem("artikel", "Artikel", Icons.Default.Edit)
 
-    // ✅ langsung ke Grafik Dashboard (bukan grafik/{userId})
     object Grafik : BottomNavItem("grafik", "Grafik", Icons.Default.Menu)
 
-    // ✅ langsung ke TweetListScreen
     object Tweet : BottomNavItem("tweet", "Tweet", Icons.Default.MailOutline)
 
-    // ✅ langsung ke ProfileScreen
     object Profile : BottomNavItem("profile", "Profile", Icons.Default.Person)
 }

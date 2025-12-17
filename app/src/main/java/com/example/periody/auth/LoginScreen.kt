@@ -26,14 +26,12 @@ fun LoginScreen(
     val scope = rememberCoroutineScope()
     val emailFocus = remember { FocusRequester() }
 
-    // Error dari Supabase
     LaunchedEffect(state.error) {
         state.error?.let {
             scope.launch { snackbarHostState.showSnackbar(it) }
         }
     }
 
-    // LOGIN SUKSES → NAVIGATE KE HOME
     LaunchedEffect(state.isAuthenticated) {
         if (state.isAuthenticated) {
             navController.navigate("home") {

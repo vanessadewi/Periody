@@ -42,16 +42,14 @@ fun HomeScreen(
         return
     }
 
-    // LOAD DATA
     LaunchedEffect(userId) {
         catatanViewModel.loadAll(userId)
-        grafikViewModel.loadData(userId)   // ← FIX
+        grafikViewModel.loadData(userId)
         reminderViewModel.load(userId)
         artikelViewModel.loadAll()
         tweetViewModel.loadTweets(userId)
     }
 
-    // STATE
     val catatanList by catatanViewModel.list.collectAsState()
     val catatanTerbaru = catatanList.take(3)
 
@@ -78,7 +76,6 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
 
-            // HEADER
             item {
                 Text(
                     text = "Halo!",
@@ -87,7 +84,6 @@ fun HomeScreen(
                 )
             }
 
-            // CATATAN
             item {
                 Text("Catatan Terbaru", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             }
@@ -116,7 +112,6 @@ fun HomeScreen(
                 ) { Text("Tambah Catatan") }
             }
 
-            // GRAFIK
             item {
                 GrafikCard(
                     grafik = grafikState,
@@ -124,7 +119,6 @@ fun HomeScreen(
                 )
             }
 
-            // REMINDER
             item {
                 ReminderCard(
                     reminder = reminderTerdekat,
@@ -132,7 +126,6 @@ fun HomeScreen(
                 )
             }
 
-            // ARTIKEL
             if (artikelTerbaru != null) {
                 item {
                     ArtikelCardComposable(
@@ -147,7 +140,6 @@ fun HomeScreen(
                 }
             }
 
-            // TWEET
             if (tweetTerbaru != null) {
                 item {
                     TweetCard(

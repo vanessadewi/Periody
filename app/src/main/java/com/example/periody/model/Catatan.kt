@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Catatan(
-    val id: String,                     // WAJIB String, bukan nullable
+    val id: String,
     val user_id: String? = null,
     val tanggal: String,
     val gejala: String? = null,

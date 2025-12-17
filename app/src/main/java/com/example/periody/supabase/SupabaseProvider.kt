@@ -13,16 +13,13 @@ object SupabaseProvider {
         supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkaW1wa2RmYmNrY2tmanV4emxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyNjUwNjIsImV4cCI6MjA4MDg0MTA2Mn0.GIzUrewje2zqxbw-_aaJt-qXNlZOecYuLTrHaA6lUGw"
     ) {
 
-        // ✅ AUTH BARU (WAJIB)
         install(Auth) {
             alwaysAutoRefresh = true
             autoLoadFromStorage = true
         }
 
-        // ✅ POSTGREST (WAJIB)
         install(Postgrest)
 
-        // ✅ STORAGE (WAJIB)
         install(Storage)
 
     }

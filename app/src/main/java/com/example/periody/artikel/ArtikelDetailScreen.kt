@@ -15,7 +15,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.periody.model.Artikel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,7 +24,7 @@ fun ArtikelDetailScreen(
     id: String
 ) {
     val state by viewModel.state.collectAsState()
-    val artikel = state.items.find { it.id == id }
+    val artikel = state.selected
 
     LaunchedEffect(id) {
         viewModel.loadDetail(id)
@@ -36,21 +35,22 @@ fun ArtikelDetailScreen(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text("Memuat...")
+            CircularProgressIndicator()
         }
         return
     }
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("") },
+            TopAppBar(
+                title = { Text("Detail Artikel") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = {
+                        navController.popBackStack()
+                    }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Kembali",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            contentDescription = "Kembali"
                         )
                     }
                 },
@@ -60,12 +60,9 @@ fun ArtikelDetailScreen(
                             navController.navigate("artikel_edit/${artikel.id}")
                         }
                     ) {
-                        Text("Edit", color = MaterialTheme.colorScheme.onPrimary)
+                        Text("Edit")
                     }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.Transparent
-                )
+                }
             )
         }
     ) { padding ->
@@ -76,52 +73,57 @@ fun ArtikelDetailScreen(
                 .fillMaxSize()
         ) {
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(260.dp)
-            ) {
-                AsyncImage(
-                    model = artikel.gambar_url,
-                    contentDescription = "Gambar Artikel",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-
+            // Gambar header
+            if (!artikel.gambar_url.isNullOrEmpty()) {
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.Transparent,
-                                    Color.Black.copy(alpha = 0.6f)
+                        .fillMaxWidth()
+                        .height(240.dp)
+                ) {
+                    AsyncImage(
+                        model = artikel.gambar_url,
+                        contentDescription = "Gambar Artikel",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.Transparent,
+                                        Color.Black.copy(alpha = 0.5f)
+                                    )
                                 )
                             )
-                        )
-                )
+                    )
 
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        artikel.judul,
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                    Text(
-                        "📅 ${artikel.created_at ?: "-"}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.8f)
-                    )
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            artikel.judul,
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Text(
+                            artikel.created_at ?: "-",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = 0.8f)
+                        )
+                    }
                 }
             }
 
+            // Konten artikel
             Column(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier
+                    .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(

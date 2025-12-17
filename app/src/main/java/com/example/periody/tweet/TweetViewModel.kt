@@ -14,9 +14,6 @@ class TweetViewModel : ViewModel() {
     private val _state = MutableStateFlow(TweetState())
     val state: StateFlow<TweetState> = _state
 
-    // ============================
-    // LOAD LIST
-    // ============================
     fun loadTweets(userId: String) {
         viewModelScope.launch {
             try {
@@ -28,9 +25,6 @@ class TweetViewModel : ViewModel() {
         }
     }
 
-    // ============================
-    // LOAD DETAIL
-    // ============================
     fun loadDetail(id: String) {
         viewModelScope.launch {
             try {
@@ -42,9 +36,6 @@ class TweetViewModel : ViewModel() {
         }
     }
 
-    // ============================
-    // TAMBAH TWEET
-    // ============================
     fun tambah(userId: String, konten: String, gambarUrl: String?, onDone: () -> Unit) {
         viewModelScope.launch {
             try {
@@ -62,9 +53,6 @@ class TweetViewModel : ViewModel() {
         }
     }
 
-    // ============================
-    // UPDATE TWEET
-    // ============================
     fun update(id: String, konten: String, gambarUrl: String?, onDone: () -> Unit) {
         viewModelScope.launch {
             try {
@@ -84,9 +72,6 @@ class TweetViewModel : ViewModel() {
         }
     }
 
-    // ============================
-    // DELETE TWEET
-    // ============================
     fun delete(id: String, onDone: () -> Unit) {
         viewModelScope.launch {
             try {

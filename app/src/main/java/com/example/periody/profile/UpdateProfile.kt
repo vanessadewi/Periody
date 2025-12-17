@@ -3,7 +3,6 @@ package com.example.periody.profile
 import com.example.periody.supabase.SupabaseProvider
 import io.github.jan.supabase.postgrest.from
 
-// Fungsi helper murni, hanya logic Supabase
 suspend fun updateProfileRemote(
     userId: String,
     username: String?,

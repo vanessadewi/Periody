@@ -7,15 +7,12 @@ import io.github.jan.supabase.postgrest.from
 class ArtikelRepository {
 
     private val client = SupabaseProvider.client
-
-    // GET ALL
     suspend fun getAll(): List<Artikel> {
         return client.from("artikel")
             .select()
             .decodeList<Artikel>()
     }
 
-    // GET BY ID
     suspend fun getById(id: String): Artikel? {
         return client.from("artikel")
             .select {
@@ -26,13 +23,11 @@ class ArtikelRepository {
             .decodeSingleOrNull<Artikel>()
     }
 
-    // INSERT
     suspend fun insert(artikel: Artikel) {
         client.from("artikel")
             .insert(artikel)
     }
 
-    // UPDATE
     suspend fun update(id: String, artikel: Artikel) {
         client.from("artikel")
             .update(artikel) {
@@ -42,7 +37,6 @@ class ArtikelRepository {
             }
     }
 
-    // DELETE
     suspend fun delete(id: String) {
         client.from("artikel")
             .delete {

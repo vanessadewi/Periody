@@ -20,8 +20,6 @@ import com.example.periody.reminder.*
 import com.example.periody.tweet.TweetListScreen
 import com.example.periody.tweet.TweetFormScreen
 import com.example.periody.tweet.TweetViewModel
-import com.example.periody.supabase.SupabaseProvider
-import io.github.jan.supabase.gotrue.auth
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -30,19 +28,16 @@ fun AppNavHost() {
 
     val navController = rememberNavController()
 
-    // ViewModel default
     val authViewModel: AuthViewModel = viewModel()
     val grafikViewModel: GrafikViewModel = viewModel()
     val artikelViewModel: ArtikelViewModel = viewModel()
     val tweetViewModel: TweetViewModel = viewModel()
 
-    // Catatan pakai factory
     val catatanRepository = remember { CatatanRepository() }
     val catatanViewModel: CatatanViewModel = viewModel(
         factory = CatatanViewModelFactory(catatanRepository)
     )
 
-    // Reminder pakai factory
     val reminderRepository = remember { ReminderRepository() }
     val reminderViewModel: ReminderViewModel = viewModel(
         factory = ReminderViewModelFactory(reminderRepository)
@@ -50,7 +45,6 @@ fun AppNavHost() {
 
     val authState by authViewModel.state.collectAsState()
 
-    // Redirect ke login jika belum login
     LaunchedEffect(authState.isAuthenticated) {
         if (!authState.isAuthenticated) {
             navController.navigate(Routes.LOGIN) {
@@ -65,16 +59,10 @@ fun AppNavHost() {
         startDestination = Routes.SPLASH
     ) {
 
-        // ============================
-        // SPLASH
-        // ============================
         composable(Routes.SPLASH) {
             SplashScreen(navController, authViewModel)
         }
 
-        // ============================
-        // AUTH
-        // ============================
         composable(Routes.LOGIN) {
             LoginScreen(navController, authViewModel)
         }
@@ -83,9 +71,6 @@ fun AppNavHost() {
             RegisterScreen(navController, authViewModel)
         }
 
-        // ============================
-        // HOME
-        // ============================
         composable(Routes.HOME) {
             if (authState.isAuthenticated) {
 
@@ -103,7 +88,7 @@ fun AppNavHost() {
                 LaunchedEffect(userId) {
                     if (userId.isNotEmpty()) {
                         catatanViewModel.loadAll(userId)
-                        grafikViewModel.loadData(userId)   // ← FIX
+                        grafikViewModel.loadData(userId)
                         reminderViewModel.load(userId)
                         tweetViewModel.loadTweets(userId)
                     }
@@ -111,9 +96,6 @@ fun AppNavHost() {
             }
         }
 
-        // ============================
-        // PROFILE
-        // ============================
         composable(Routes.PROFILE) {
             ProfileScreen(navController, authViewModel)
         }
@@ -122,9 +104,6 @@ fun AppNavHost() {
             EditProfileScreen(navController, authViewModel)
         }
 
-        // ============================
-        // ARTIKEL
-        // ============================
         composable("artikel") {
             ArtikelListScreen(navController, artikelViewModel)
         }
@@ -145,9 +124,6 @@ fun AppNavHost() {
             ArtikelFormScreen(navController, artikelViewModel, userId, existingId = id)
         }
 
-        // ============================
-        // GRAFIK
-        // ============================
         composable("grafik") {
             GrafikScreen(
                 authViewModel = authViewModel,
@@ -155,9 +131,6 @@ fun AppNavHost() {
             )
         }
 
-        // ============================
-        // CATATAN
-        // ============================
         composable("catatan") {
             val userId = authState.currentUser?.id ?: ""
             CatatanListScreen(navController, catatanViewModel, userId)
@@ -179,9 +152,6 @@ fun AppNavHost() {
             CatatanFormScreen(navController, catatanViewModel, "edit", id, userId)
         }
 
-        // ============================
-        // REMINDER
-        // ============================
         composable(Routes.REMINDER) {
             ReminderListScreen(navController, reminderViewModel)
         }
@@ -202,9 +172,6 @@ fun AppNavHost() {
             ReminderFormScreen(navController, reminderViewModel, "edit", id, userId)
         }
 
-        // ============================
-        // TWEET
-        // ============================
         composable(Routes.TWEET) {
             TweetListScreen(navController, tweetViewModel)
         }

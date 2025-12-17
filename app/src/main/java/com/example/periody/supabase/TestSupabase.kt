@@ -9,7 +9,7 @@ import io.github.jan.supabase.postgrest.postgrest
 object TestSupabase {
 
     fun testConnection() {
-        CoroutineScope(Dispatchers.Main).launch {   // ✅ WAJIB MAIN THREAD
+        CoroutineScope(Dispatchers.Main).launch {
             try {
                 val response = SupabaseProvider.client
                     .postgrest

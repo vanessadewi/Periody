@@ -38,7 +38,6 @@ fun EditProfileScreen(
     var phone by remember { mutableStateOf(user?.phone ?: "") }
     var address by remember { mutableStateOf(user?.address ?: "") }
 
-    // Foto baru
     var imageUri by remember { mutableStateOf<Uri?>(null) }
 
     val launcher = rememberLauncherForActivityResult(GetContent()) { uri ->
@@ -64,7 +63,6 @@ fun EditProfileScreen(
                 fontWeight = FontWeight.Bold
             )
 
-            // FOTO PROFIL
             Box(contentAlignment = Alignment.BottomEnd) {
                 Image(
                     painter = rememberAsyncImagePainter(
@@ -92,7 +90,6 @@ fun EditProfileScreen(
                 }
             }
 
-            // USERNAME
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
@@ -100,7 +97,6 @@ fun EditProfileScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // FULL NAME
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
@@ -108,7 +104,6 @@ fun EditProfileScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // PHONE
             OutlinedTextField(
                 value = phone,
                 onValueChange = { phone = it },
@@ -116,7 +111,6 @@ fun EditProfileScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // ADDRESS
             OutlinedTextField(
                 value = address,
                 onValueChange = { address = it },
@@ -126,7 +120,6 @@ fun EditProfileScreen(
 
             Spacer(Modifier.height(10.dp))
 
-            // TOMBOL SIMPAN
             Button(
                 onClick = {
                     // Update text fields
@@ -137,7 +130,6 @@ fun EditProfileScreen(
                         address = address
                     )
 
-                    // Upload foto jika ada foto baru
                     imageUri?.let { uri ->
                         authViewModel.updateProfileImage(
                             context = context,

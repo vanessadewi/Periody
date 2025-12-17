@@ -16,13 +16,11 @@ fun SplashScreen(
     val state by viewModel.state.collectAsState()
     var sessionChecked by remember { mutableStateOf(false) }
 
-    // Jalankan checkSession sekali
     LaunchedEffect(true) {
         viewModel.checkSession()
         sessionChecked = true
     }
 
-    // Navigasi hanya setelah checkSession selesai dan loading selesai
     LaunchedEffect(sessionChecked, state.isAuthenticated, state.isLoading) {
 
         if (!sessionChecked || state.isLoading) return@LaunchedEffect

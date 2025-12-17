@@ -18,7 +18,6 @@ class CatatanViewModel(
     private val _state = MutableStateFlow(CatatanState())
     val state: StateFlow<CatatanState> = _state
 
-    // ⭐ INI YANG DIPAKAI HomeScreen
     val list: StateFlow<List<Catatan>> =
         state.map { it.list }
             .let { mapped -> MutableStateFlow(emptyList<Catatan>()) }

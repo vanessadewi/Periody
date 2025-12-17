@@ -12,7 +12,6 @@ class UserRepository {
 
     private val supabase = SupabaseProvider.client
 
-    // ✅ REGISTER (Auth + Insert ke tabel users)
     suspend fun register(
         email: String,
         password: String,
@@ -21,7 +20,6 @@ class UserRepository {
         lastName: String?
     ): String = withContext(Dispatchers.IO) {
 
-        // ✅ Sign up dengan API baru
         supabase.auth.signUpWith(Email) {
             this.email = email
             this.password = password
@@ -34,7 +32,6 @@ class UserRepository {
             .joinToString(" ")
             .ifBlank { null }
 
-        // ✅ Insert ke tabel users
         supabase.from("users").insert(
             mapOf(
                 "id" to userId,
@@ -52,7 +49,6 @@ class UserRepository {
         userId
     }
 
-    // ✅ LOGIN
     suspend fun login(email: String, password: String) = withContext(Dispatchers.IO) {
         supabase.auth.signInWith(Email) {
             this.email = email
@@ -60,17 +56,14 @@ class UserRepository {
         }
     }
 
-    // ✅ LOGOUT
     suspend fun logout() = withContext(Dispatchers.IO) {
         supabase.auth.signOut()
     }
 
-    // ✅ GET CURRENT USER ID
     suspend fun getCurrentUserId(): String? = withContext(Dispatchers.IO) {
         supabase.auth.currentSessionOrNull()?.user?.id
     }
 
-    // ✅ GET USER BY ID
     suspend fun getUserById(id: String): User = withContext(Dispatchers.IO) {
         supabase
             .from("users")

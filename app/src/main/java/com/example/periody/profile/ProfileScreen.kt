@@ -31,7 +31,6 @@ fun ProfileScreen(
     val user = authState.currentUser
     val scroll = rememberScrollState()
 
-    // ⭐ FIX PALING PENTING
     LaunchedEffect(Unit) {
         val userId = authState.currentUser?.id
         if (userId != null) {
@@ -49,7 +48,6 @@ fun ProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // FOTO PROFIL
             Box(contentAlignment = Alignment.BottomEnd) {
                 Image(
                     painter = rememberAsyncImagePainter(user?.profileImageUrl ?: ""),

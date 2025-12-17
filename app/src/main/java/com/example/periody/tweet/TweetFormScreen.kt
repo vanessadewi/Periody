@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 fun TweetFormScreen(
     navController: NavController,
     viewModel: TweetViewModel = viewModel(),
-    mode: String, // "tambah" atau "edit"
+    mode: String,
     id: String?,
     userId: String
 ) {

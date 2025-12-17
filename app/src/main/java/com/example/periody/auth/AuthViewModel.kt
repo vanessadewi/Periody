@@ -234,9 +234,6 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    // ============================================================
-    // LOGOUT
-    // ============================================================
     fun logout() {
         viewModelScope.launch {
             _state.value = AuthState()
@@ -246,18 +243,12 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    // ============================================================
-    // LOAD USER (SYNC)
-    // ============================================================
     private suspend fun loadUserSync(userId: String): User {
         return supabase.from("users")
             .select { filter { eq("id", userId) } }
             .decodeSingle<User>()
     }
 
-    // ============================================================
-    // LOAD USER (ASYNC)
-    // ============================================================
     fun loadUser(userId: String) {
         viewModelScope.launch {
             try {
@@ -269,9 +260,6 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    // ============================================================
-    // UPDATE FOTO PROFIL
-    // ============================================================
     fun updateProfileImage(
         context: Context,
         userId: String,
@@ -298,9 +286,6 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    // ============================================================
-    // UPDATE USER DATA
-    // ============================================================
     fun updateUserAll(
         username: String,
         name: String?,
@@ -333,9 +318,6 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    // ============================================================
-    // UPDATE EMAIL
-    // ============================================================
     fun updateEmail(newEmail: String) {
         viewModelScope.launch {
             try {
@@ -357,9 +339,6 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    // ============================================================
-    // UPDATE PASSWORD
-    // ============================================================
     fun updatePassword(newPassword: String) {
         viewModelScope.launch {
             try {
