@@ -1,4 +1,4 @@
-package com.example.periody.grafik
+package com.example.periody.grafik.ui.components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
@@ -35,7 +35,6 @@ fun BarChart(
                 modifier = Modifier.width(barWidth),
                 verticalArrangement = Arrangement.Bottom
             ) {
-                // Label angka di atas batang
                 Text(
                     text = value.toString(),
                     style = MaterialTheme.typography.labelSmall,
@@ -59,7 +58,6 @@ fun BarChart(
 
                 Spacer(Modifier.height(4.dp))
 
-                // Label kategori di bawah batang
                 Text(
                     text = labels[index],
                     style = MaterialTheme.typography.labelSmall,

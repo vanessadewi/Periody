@@ -1,54 +1,71 @@
-package com.example.periody.grafik
+package com.example.periody.grafik.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.periody.model.Catatan
-import com.example.periody.supabase.SupabaseProvider
-import io.github.jan.supabase.postgrest.from
+import com.example.periody.grafik.data.GrafikRepository
+import com.example.periody.grafik.data.GrafikStorageHelper
+import com.example.periody.model.Grafik
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.util.UUID
 
-data class GrafikState(
-    val gejalaUtama: Map<String, Int> = emptyMap(),
-    val gejalaTambahan: Map<String, Int> = emptyMap(),
-    val intensitasList: List<Double> = emptyList(),
-    val rataRataIntensitas: Double? = null
-)
-
-class GrafikViewModel : ViewModel() {
+class GrafikViewModel(
+    private val repository: GrafikRepository = GrafikRepository()
+) : ViewModel() {
 
     private val _state = MutableStateFlow(GrafikState())
     val state: StateFlow<GrafikState> = _state
 
     fun loadData(userId: String) {
         viewModelScope.launch {
-            val data = SupabaseProvider.client
-                .from("catatan")
-                .select()
-                .decodeList<Catatan>()
-
-            val userData = data.filter { it.user_id == userId }
-
-            val gejalaUtama = userData
-                .mapNotNull { it.gejala }
-                .groupingBy { it }
-                .eachCount()
-
-            val gejalaTambahan = userData
-                .flatMap { it.gejala_tambahan ?: emptyList() }
-                .groupingBy { it }
-                .eachCount()
-
-            val intensitasList = userData.mapNotNull { it.intensitas }
-            val rataRata = intensitasList.takeIf { it.isNotEmpty() }?.average()
-
-            _state.value = GrafikState(
-                gejalaUtama = gejalaUtama,
-                gejalaTambahan = gejalaTambahan,
-                intensitasList = intensitasList,
-                rataRataIntensitas = rataRata
-            )
+            _state.value = _state.value.copy(isLoading = true)
+            try {
+                val list = repository.getGrafikByUser(userId)
+                _state.value = _state.value.copy(grafikList = list, isLoading = false)
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(error = e.message, isLoading = false)
+            }
         }
     }
+
+    fun tambahGrafik(
+        userId: String,
+        title: String,
+        description: String?,
+        imageBytes: ByteArray,
+        onDone: () -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                val imageUrl = GrafikStorageHelper.uploadImage(imageBytes)
+                val grafik = Grafik(
+                    id = UUID.randomUUID().toString(),
+                    title = title,
+                    description = description,
+                    image_url = imageUrl,
+                    created_at = Instant.now().toString(),
+                    user_id = userId
+                )
+                repository.insertGrafik(grafik)
+                loadData(userId)
+                onDone()
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(error = e.message)
+            }
+        }
+    }
+
+    fun hapusGrafik(id: String, userId: String) {
+        viewModelScope.launch {
+            try {
+                repository.deleteGrafik(id)
+                loadData(userId)
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(error = e.message)
+            }
+        }
+    }
+
 }

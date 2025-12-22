@@ -11,14 +11,17 @@ import androidx.navigation.compose.rememberNavController
 import com.example.periody.artikel.*
 import com.example.periody.auth.*
 import com.example.periody.catatan.*
-import com.example.periody.grafik.GrafikScreen
-import com.example.periody.grafik.GrafikViewModel
+import com.example.periody.grafik.GrafikFormScreen
+import com.example.periody.grafik.presentation.GrafikViewModel
+import com.example.periody.grafik.presentation.GrafikViewModelFactory
+import com.example.periody.grafik.ui.GrafikListScreen
+import com.example.periody.grafik.ui.GrafikScreen
 import com.example.periody.home.HomeScreen
 import com.example.periody.profile.EditProfileScreen
 import com.example.periody.profile.ProfileScreen
 import com.example.periody.reminder.*
-import com.example.periody.tweet.TweetListScreen
 import com.example.periody.tweet.TweetFormScreen
+import com.example.periody.tweet.TweetListScreen
 import com.example.periody.tweet.TweetViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -29,9 +32,10 @@ fun AppNavHost() {
     val navController = rememberNavController()
 
     val authViewModel: AuthViewModel = viewModel()
-    val grafikViewModel: GrafikViewModel = viewModel()
     val artikelViewModel: ArtikelViewModel = viewModel()
     val tweetViewModel: TweetViewModel = viewModel()
+
+    val grafikViewModel: GrafikViewModel = viewModel(factory = GrafikViewModelFactory())
 
     val catatanRepository = remember { CatatanRepository() }
     val catatanViewModel: CatatanViewModel = viewModel(
@@ -73,9 +77,6 @@ fun AppNavHost() {
 
         composable(Routes.HOME) {
             if (authState.isAuthenticated) {
-
-                val userId = authState.currentUser?.id ?: ""
-
                 HomeScreen(
                     navController = navController,
                     catatanViewModel = catatanViewModel,
@@ -84,15 +85,6 @@ fun AppNavHost() {
                     artikelViewModel = artikelViewModel,
                     tweetViewModel = tweetViewModel
                 )
-
-                LaunchedEffect(userId) {
-                    if (userId.isNotEmpty()) {
-                        catatanViewModel.loadAll(userId)
-                        grafikViewModel.loadData(userId)
-                        reminderViewModel.load(userId)
-                        tweetViewModel.loadTweets(userId)
-                    }
-                }
             }
         }
 
@@ -127,7 +119,27 @@ fun AppNavHost() {
         composable("grafik") {
             GrafikScreen(
                 authViewModel = authViewModel,
-                viewModel = grafikViewModel
+                viewModel = grafikViewModel,
+                navController = navController
+            )
+        }
+
+
+        composable("grafik_form") {
+            val userId = authState.currentUser?.id ?: ""
+            GrafikFormScreen(
+                userId = userId,
+                viewModel = grafikViewModel,
+                navController = navController
+            )
+        }
+
+        composable("grafik_list") {
+            val userId = authState.currentUser?.id ?: ""
+            GrafikListScreen(
+                userId = userId,
+                viewModel = grafikViewModel,
+                navController = navController
             )
         }
 

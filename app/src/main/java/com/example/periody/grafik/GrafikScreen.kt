@@ -1,4 +1,4 @@
-package com.example.periody.grafik
+package com.example.periody.grafik.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -7,21 +7,24 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.periody.auth.AuthViewModel
+import com.example.periody.grafik.presentation.GrafikViewModel
+import com.example.periody.grafik.ui.components.BarChart
+import com.example.periody.grafik.ui.components.GrafikCard
 
 @Composable
 fun GrafikScreen(
     authViewModel: AuthViewModel,
-    viewModel: GrafikViewModel
+    viewModel: GrafikViewModel,
+    navController: NavController
 ) {
     val authState by authViewModel.state.collectAsState()
     val user = authState.currentUser
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(user?.id) {
-        if (user != null) {
-            viewModel.loadData(user.id)
-        }
+        user?.id?.let { viewModel.loadData(it) }
     }
 
     Column(
@@ -31,49 +34,44 @@ fun GrafikScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-
         GrafikCard(
-            title = "Grafik Gejala Utama",
-            description = "Menampilkan jumlah gejala utama."
+            title = "Grafik Jumlah Data",
+            description = "Menampilkan jumlah grafik yang telah kamu buat."
         ) {
-            if (state.gejalaUtama.isEmpty()) {
-                Text("Tidak ada data")
-            } else {
-                BarChart(
-                    labels = state.gejalaUtama.keys.toList(),
-                    values = state.gejalaUtama.values.toList()
-                )
-            }
+            BarChart(
+                labels = listOf("Total"),
+                values = listOf(state.grafikList.size)
+            )
         }
 
         GrafikCard(
-            title = "Grafik Gejala Tambahan",
-            description = "Menampilkan frekuensi gejala tambahan yang tercatat."
+            title = "Judul Grafik Terbaru",
+            description = "Menampilkan judul grafik terakhir yang kamu buat."
         ) {
-            if (state.gejalaTambahan.isEmpty()) {
-                Text("Tidak ada data")
+            val latest = state.grafikList.firstOrNull()
+            if (latest != null) {
+                Text(text = latest.title, style = MaterialTheme.typography.bodyLarge)
             } else {
-                BarChart(
-                    labels = state.gejalaTambahan.keys.toList(),
-                    values = state.gejalaTambahan.values.toList()
-                )
+                Text("Belum ada grafik.")
             }
         }
 
-        GrafikCard(
-            title = "Grafik Intensitas",
-            description = "Menampilkan tingkat intensitas gejala dari setiap catatan."
+        Button(
+            onClick = { navController.navigate("grafik_form") },
+            modifier = Modifier.fillMaxWidth()
         ) {
-            if (state.intensitasList.isEmpty()) {
-                Text("Tidak ada data")
-            } else {
-                BarChart(
-                    labels = state.intensitasList.indices.map { "C${it + 1}" },
-                    values = state.intensitasList.map { it.toInt() }
-                )
-                Spacer(Modifier.height(8.dp))
-                Text("Rata-rata Intensitas: ${"%.1f".format(state.rataRataIntensitas ?: 0.0)}")
-            }
+            Text("Tambah Grafik")
+        }
+
+        Button(
+            onClick = { navController.navigate("grafik_list") },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Lihat Semua Grafik")
+        }
+
+        state.error?.let {
+            Text(it, color = MaterialTheme.colorScheme.error)
         }
     }
 }

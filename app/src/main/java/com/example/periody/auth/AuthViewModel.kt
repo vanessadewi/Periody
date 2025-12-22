@@ -71,18 +71,19 @@ class AuthViewModel : ViewModel() {
 
     private fun mapRegisterError(e: Exception): String {
         val msg = e.message ?: ""
+
         return when {
             "duplicate key value violates unique constraint" in msg ->
-                "Email sudah terdaftar. Silakan login."
+                "Email ini sudah terdaftar. Silakan gunakan email lain atau coba login."
+
             "Failed to connect" in msg || "timeout" in msg ->
-                "Tidak dapat terhubung ke server. Periksa koneksi internet Anda."
-            else -> "Registrasi gagal. Silakan coba lagi."
+                "Kami kesulitan terhubung ke server. Coba periksa koneksi internet Anda."
+
+            else ->
+                "Pendaftaran tidak dapat diproses saat ini. Silakan coba beberapa saat lagi."
         }
     }
 
-    // ============================================================
-    // SANITIZE INPUT
-    // ============================================================
     private fun sanitizeInput(
         username: String,
         firstName: String?,
@@ -109,9 +110,6 @@ class AuthViewModel : ViewModel() {
         )
     }
 
-    // ============================================================
-    // REGISTER
-    // ============================================================
     private fun register(
         email: String,
         password: String,
@@ -129,34 +127,41 @@ class AuthViewModel : ViewModel() {
                 registerSuccess = false
             )
 
-            // VALIDASI INPUT
+            // VALIDASI INPUT RAMAH
             when {
-                email.isBlank() -> return@launch showError("Email wajib diisi.")
-                !email.contains("@") -> return@launch showError("Format email tidak valid.")
-                password.length < 6 -> return@launch showError("Password minimal 6 karakter.")
-                username.isBlank() -> return@launch showError("Username wajib diisi.")
-                firstName.isNullOrBlank() -> return@launch showError("Nama depan wajib diisi.")
-                lastName.isNullOrBlank() -> return@launch showError("Nama belakang wajib diisi.")
+                email.isBlank() ->
+                    return@launch showError("Mohon isi email Anda terlebih dahulu.")
+
+                !email.contains("@") ->
+                    return@launch showError("Format email belum sesuai. Silakan periksa kembali.")
+
+                password.length < 6 ->
+                    return@launch showError("Kata sandi minimal 6 karakter agar lebih aman.")
+
+                username.isBlank() ->
+                    return@launch showError("Username belum diisi. Silakan lengkapi terlebih dahulu.")
+
+                firstName.isNullOrBlank() ->
+                    return@launch showError("Nama depan belum diisi.")
+
+                lastName.isNullOrBlank() ->
+                    return@launch showError("Nama belakang belum diisi.")
             }
 
             try {
-                // 1) Register ke Auth
                 supabase.auth.signUpWith(Email) {
                     this.email = email
                     this.password = password
                 }
 
-                // 2) Ambil userId dari session
                 val session = supabase.auth.currentSessionOrNull()
                     ?: throw Exception("Session tidak ditemukan setelah registrasi")
 
                 val userId = session.user?.id
                     ?: throw Exception("User ID tidak ditemukan setelah registrasi")
 
-                // 3) Bersihkan input
                 val cleaned = sanitizeInput(username, firstName, lastName, phone, address)
 
-                // 4) Insert ke tabel users (SESUAI TABEL KAMU)
                 supabase.from("users").insert(
                     mapOf(
                         "id" to userId,
@@ -185,12 +190,10 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    // ============================================================
-    // LOGIN
-    // ============================================================
     private fun login(email: String, password: String) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
+
             try {
                 supabase.auth.signInWith(Email) {
                     this.email = email
@@ -208,14 +211,24 @@ class AuthViewModel : ViewModel() {
                 )
 
             } catch (e: Exception) {
-                showError(e.message ?: "Login gagal")
+                val msg = e.message ?: ""
+
+                val friendlyMessage = when {
+                    "Invalid login credentials" in msg ->
+                        "Email atau kata sandi tidak cocok. Silakan periksa kembali."
+
+                    "Failed to connect" in msg || "timeout" in msg ->
+                        "Kami kesulitan terhubung ke server. Coba periksa koneksi internet Anda."
+
+                    else ->
+                        "Login tidak dapat diproses saat ini. Silakan coba beberapa saat lagi."
+                }
+
+                showError(friendlyMessage)
             }
         }
     }
 
-    // ============================================================
-    // CHECK SESSION
-    // ============================================================
     fun checkSession() {
         viewModelScope.launch {
             val session = supabase.auth.currentSessionOrNull()

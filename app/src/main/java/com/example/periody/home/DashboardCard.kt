@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.periody.model.*
-import com.example.periody.grafik.GrafikState
+import com.example.periody.grafik.presentation.GrafikState
 
 @Composable
 fun CatatanCard(catatan: Catatan?, onClick: () -> Unit) {
@@ -64,7 +64,6 @@ fun GrafikCard(grafik: GrafikState?, onClick: () -> Unit) {
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(Modifier.padding(16.dp)) {
-
             Text("Grafik Siklus", fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
 
@@ -78,7 +77,7 @@ fun GrafikCard(grafik: GrafikState?, onClick: () -> Unit) {
                 val totalCatatan = grafik.intensitasList.size
                 Text("Total Catatan: $totalCatatan")
 
-                val gejalaTerbanyak = grafik.gejalaUtama.maxByOrNull { it.value }?.key
+                val gejalaTerbanyak = grafik.gejalaUtama.maxByOrNull { entry -> entry.value }?.key
                 Text("Gejala Paling Sering: ${gejalaTerbanyak ?: "-"}")
 
                 val intensitasAvg = grafik.rataRataIntensitas ?: 0.0

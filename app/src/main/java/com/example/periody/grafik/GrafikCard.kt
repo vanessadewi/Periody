@@ -1,4 +1,4 @@
-package com.example.periody.grafik
+package com.example.periody.grafik.ui.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
