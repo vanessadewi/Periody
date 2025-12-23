@@ -24,7 +24,7 @@ fun GrafikScreen(
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(user?.id) {
-        user?.id?.let { viewModel.loadData(it) }
+        user?.id?.let { viewModel.loadData() }
     }
 
     Column(

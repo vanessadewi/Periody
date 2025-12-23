@@ -41,7 +41,7 @@ fun HomeScreen(
 
     LaunchedEffect(userId) {
         catatanViewModel.loadAll(userId)
-        grafikViewModel.loadData(userId)
+        grafikViewModel.loadData()
         reminderViewModel.load(userId)
         artikelViewModel.loadAll()
         tweetViewModel.loadTweets(userId)

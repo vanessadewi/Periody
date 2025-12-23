@@ -126,9 +126,7 @@ fun AppNavHost() {
 
 
         composable("grafik_form") {
-            val userId = authState.currentUser?.id ?: ""
             GrafikFormScreen(
-                userId = userId,
                 viewModel = grafikViewModel,
                 navController = navController
             )

@@ -21,7 +21,7 @@ fun GrafikListScreen(
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(userId) {
-        viewModel.loadData(userId)
+        viewModel.loadData()
     }
 
     Column(Modifier.padding(16.dp)) {
@@ -85,7 +85,7 @@ fun GrafikItem(
                     Text("Edit")
                 }
                 Button(onClick = {
-                    viewModel.hapusGrafik(grafik.id, grafik.user_id)
+                    viewModel.hapusGrafik(grafik.id)
                 }) {
                     Text("Hapus")
                 }
